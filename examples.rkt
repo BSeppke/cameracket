@@ -5,13 +5,28 @@
 (require vigracket)
 (require cameracket)
 
+(require (rename-in 2htdp/image
+                    (save-image save-plt-image)
+                    (image-width plt-image-width)
+                    (image-height plt-image-height)))
+(require 2htdp/universe)
+
 (define cam (start-camera-capture))
 
-(display "Enter A and press [ENTER] to take a picture: ")
-(define uninteresting_input (read))
-(define image (grabimage cam))
+(define (grab+resize cam)
+  (let* ((img   (grabimage cam))
+         (new_w (inexact->exact (round (/ (image-width  img) 3))))
+         (new_h (inexact->exact (round (/ (image-height img) 3)))))
+  (resizeimage img new_w new_h 0)))
 
-(show-image image)
-;; Alternative (image->plt-image image)
+
+(define buf (image->racket-image (grab+resize cam)))
+
+(define (live-view t)
+  (when (= (modulo t 3) 0)
+    (set! buf (image->racket-image (grab+resize cam))))
+  buf)
+
+(animate live-view)
 
 (stop-camera-capture cam)
