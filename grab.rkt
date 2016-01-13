@@ -51,7 +51,7 @@
                      [device : _camera-capture]
                      -> (res :  _int))))
 
-(define (start-camera-capture (device_id 0))
+(define (start-camera-capture [device_id 0])
   (opencv_get_cam_capture_c device_id))
 
 (define (stop-camera-capture device_handle)
@@ -67,21 +67,26 @@
   (if (equal?  (cpointer-tag device_handle) 'camera-capture)
       (let* ((width (opencv_get_cam_frame_width_ptr_c   device_handle))
              (height (opencv_get_cam_frame_height_ptr_c device_handle))
-             (img (make-image width height 3 0.0 0.0 0.0))
-             (foo  (opencv_grab_camera_rgbimage_ptr_c (image-data img 0)  (image-data img 1)  (image-data img 2) width height device_handle)))
-        (case foo
-          ((0) img)
-          ((1) (error "Error in cameracket.grab.grabimage: Image cannot be grabbed by opencv!"))
-          ((2) (error "Error in cameracket.grab.grabimage: Image is not RGB colored"))
-          ((3) (error "Error in cameracket.grab.grabimage: Sizes do not match!"))))
+             (img (make-image width height 3 0.0 0.0 0.0)))
+        (grabimage-unsafe! img device_handle))
       (error (string-append "Error in cameracket.grab.grabimage: incompatible capture used!\n"
                             "Expected: 'camera_capture\n"
                             "Got: '" (symbol->string (cpointer-tag device_handle))))))
+
+(define (grabimage-unsafe! img device_handle)
+  (case (opencv_grab_camera_rgbimage_ptr_c (image-data img 0)  (image-data img 1)  (image-data img 2) (image-width img) (image-height img) device_handle)
+    ((0) img)
+    ((1) (error "Error in cameracket.grab.grabimage-unsafe!: Image cannot be grabbed by opencv!"))
+    ((2) (error "Error in cameracket.grab.grabimage-unsafe!: Image is not RGB colored"))
+    ((3) (error "Error in cameracket.grab.grabimage-unsafe!: Sizes do not match!"))))
   
-  
-(define image-grab grabimage)
+
+(define image-grab         grabimage)
+(define image-grab-unsafe! grabimage-unsafe!)
 
 (provide    grabimage
             image-grab
+            grabimage-unsafe!
+            image-grab-unsafe!
             start-camera-capture
             stop-camera-capture)

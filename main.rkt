@@ -12,7 +12,9 @@
            
            ;camracket.grab:
            grabimage 
+           grabimage-unsafe! 
            image-grab
+           image-grab-unsafe!
            start-camera-capture
            stop-camera-capture
 ) ; End of "provide"
