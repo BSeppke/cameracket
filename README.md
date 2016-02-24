@@ -12,7 +12,7 @@ After the installation, the command
 > pkg-config --modversion opencv
 needs to find the opencv-bindings for Linux and MacOS
 
-Note, that for Windows, you also need to have installed the MS VC-Runtime (2010) in order to get these binaries running.
+Note, that for Windows, you also need to have installed the MS VC-Runtime 11 (2012) in order to get these binaries running.
  
 2. Installation
 -----------------------------------
