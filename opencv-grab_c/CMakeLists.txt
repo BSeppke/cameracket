@@ -20,10 +20,4 @@ set(CMAKE_MACOSX_RPATH FALSE)
 #Find OpenCV
 find_package(OpenCV REQUIRED)
 
-# Find VIGRA
-find_package(Vigra)
-if(Vigra_FOUND)
-    include_directories(${Vigra_INCLUDE_DIRS})
-endif()
-
 add_subdirectory(src)
