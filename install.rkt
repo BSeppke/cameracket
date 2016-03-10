@@ -59,11 +59,11 @@
             (display "-------------- BUILDING OpenCV-C-WRAPPER FOR CAMERA GRABBING --------------")
             (newline)
             (current-directory opencv-grab_c-path)
-            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd ..")) ; "make macosx32",  "make macosx64", "make unix32"  or "make unix64"
+            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .."))
                 (begin
                   (copy-file (build-path (current-directory) "bin" dylib-file) dylib-path #t)
                   #t)
-                (error "making the opencv-grab_c lib failed, although OpenCV seems to be installed")))
+                (error "Making the opencv-grab_c lib failed, although OpenCV seems to be installed")))
           (error "OpenCV is not found. Please check if the prefix path is set correctly in /.profile file!"))
       ;;For windows
       (if (equal? (system-type 'os) 'windows)
