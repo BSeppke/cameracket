@@ -42,4 +42,4 @@
 ;;;Example usage:
 ;(test-speed)
 
-(stop-camera-capture cam)
+;;(stop-camera-capture cam)
