@@ -59,7 +59,7 @@
             (display "-------------- BUILDING OpenCV-C-WRAPPER FOR CAMERA GRABBING --------------")
             (newline)
             (current-directory opencv-grab_c-path)
-            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .."))
+            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .. && rm -rf ./build"))
                 (begin
                   (copy-file (build-path (current-directory) "bin" dylib-file) dylib-path #t)
                   #t)

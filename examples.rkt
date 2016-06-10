@@ -10,12 +10,6 @@
                     (image-height plt-image-height)))
 (require 2htdp/universe)
 
-(require (rename-in 2htdp/image
-                    (save-image save-plt-image)
-                    (image-width plt-image-width)
-                    (image-height plt-image-height)))
-(require 2htdp/universe)
-
 (define cam (start-camera-capture))
 
 (define pic_img   (grabimage cam))
