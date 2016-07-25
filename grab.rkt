@@ -4,8 +4,8 @@
 
 (require cameracket/config)
 
-(require scheme/foreign)
-(unsafe!)
+(require ffi/unsafe)
+(require ffi/cvector)
 
 
 (define-cpointer-type _camera-capture)

@@ -47,8 +47,8 @@
 (require (only-in ffi/unsafe ctype-sizeof _pointer))
 (define racket-bits (* 8 (ctype-sizeof _pointer)))
 (define cmake_flags (if (= racket-bits 32)
-                        "-DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32"
-                        ""))
+                        "-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32"
+                        "-DCMAKE_BUILD_TYPE=Release"))
 
 ; 8. The compilation routine (at least for macosx and unix)
  (if (or (equal? (system-type 'os) 'macosx)
@@ -59,7 +59,7 @@
             (display "-------------- BUILDING OpenCV-C-WRAPPER FOR CAMERA GRABBING --------------")
             (newline)
             (current-directory opencv-grab_c-path)
-            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .."))
+            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .. && rm -rf ./build"))
                 (begin
                   (copy-file (build-path (current-directory) "bin" dylib-file) dylib-path #t)
                   #t)
