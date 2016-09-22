@@ -1,4 +1,3 @@
-
+opencv-grab_c/build
 *.dylib
-
 *.o
