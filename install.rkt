@@ -36,7 +36,7 @@
                          base_login_script
                          (path->string (build-path opencv-grab_c-path "fallback.profile"))))
 
-(define login_cmd (string-append "source " login_script))
+(define login_cmd (string-append ". " login_script))
 (define (system-env arg) (system (string-append login_cmd " && " arg)))
 
 (define (opencv-installed?)
