@@ -30,7 +30,7 @@
   (if (= n 0)
       "finished"
       (begin
-        (time (grabimage-unsafe! pic_img))
+        (time (grabimage-unsafe! pic_img cam))
         (test-speed (- n 1)))))
 
 ;;;Example usage:
