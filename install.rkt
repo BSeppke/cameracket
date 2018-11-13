@@ -6,69 +6,43 @@
 (define local-install-path  
   (build-path local-collects-path "cameracket"))
 
-;; 1. Create local collects directory if not already existing
-(when (not (directory-exists? local-collects-path))
-  (make-directory* local-collects-path))
 
-;; 2. If vigracket-collects dir extist, delete it.
-(when (directory-exists? local-install-path)
-  (delete-directory/files local-install-path))
+(define (show-notes)
+  (display (format "cameracket has been successfully installed in ~a." local-install-path))(newline)
+  (display "Use it by typing (require cameracket) or run the examples (provided in examples.rkt)")(newline)
+  (cond ((equal? (system-type 'os) 'windows)
+         (begin
+           (display "=== Important notes for Windows ===")(newline)
+           (display "Please make sure to install the MS Visual C++ 2012 runtimes first!")(newline)
+           (display "You may get them from: https://www.microsoft.com/en-us/download/details.aspx?id=30679")(newline)))         
+        ((equal? (system-type 'os) 'macosx)
+         (begin
+           (display "=== Important notes for Max OS X ===")(newline)
+           (display "Please install the MacPorts port system first! You get it from: https://www.macports.org")(newline)
+           (display "After the installation of MacPorts, install CMake and opencv by typing:")(newline)
+           (display "    sudo port install cmake")(newline)
+           (display "    sudo port install opencv")(newline)
+           (display "The wrapper library opencv-grab_c will be build on the first load of the cameracket module!")(newline)))   
+        ((equal? (system-type 'os) 'unix)
+         (begin
+           (display "=== Important notes for Linux ===")(newline)
+           (display "Please make sure to install OpenCV first!")(newline)
+           (display "The wrapper library opencv-grab_c will be build on the first load of the cameracket module!")(newline)))))
 
-;; 3. copy the installation contents to the local/collects/vigracket directory
-(copy-directory/files (current-directory) local-install-path)
+(define (install-cameracket)
+  (begin
+    ;; 1. Create local collects directory if not already existing
+    (when (not (directory-exists? local-collects-path))
+      (make-directory* local-collects-path))
+    ;; 2. If cameracket-collects dir extist, delete it.
+    (when (directory-exists? local-install-path)
+      (delete-directory/files local-install-path))
+    ;; 3. copy the installation contents to the local/collects/cameracket directory
+    (copy-directory/files (current-directory) local-install-path)
+    ;; 4. Tell the user about the status of the installation:
+    (show-notes)))
 
-;; 4. Load dll under windows, dylib under MacOS
-(define dylib-file
-    (cond ((equal? (system-type 'os) 'windows) "opencv-grab_c.dll")
-          ((equal? (system-type 'os) 'macosx)  "libopencv-grab_c.dylib")
-          ((equal? (system-type 'os) 'unix)    "libopencv-grab_c.so")
-          (else (error "Only macosx, windows and unix are supported"))))
-(define dylib-path (build-path local-install-path dylib-file))
-
-;; 5. For Windows: Add the dll directory to the systems path:
-(when (equal? (system-type 'os) 'windows)
-    (putenv "PATH" (string-append (path->string local-install-path) ";" (getenv "PATH"))))
-
-;; 6. Stuff needed to compile the c-bindings if necessary...
-(define base_login_script "~/.profile")
-(define opencv-grab_c-path (build-path local-install-path "opencv-grab_c"))
-(define login_script (if (file-exists? base_login_script)
-                         base_login_script
-                         (path->string (build-path opencv-grab_c-path "fallback.profile"))))
-
-(define login_cmd (string-append ". " login_script))
-(define (system-env arg) (system (string-append login_cmd " && " arg)))
-
-(define (opencv-installed?)
-  (display "Searching for OpenCV using 'pkg-config --modversion opencv': ")
-  (system-env "pkg-config --modversion opencv"))
-
-;; 7. Find out, which architecture DrRacket is built
-(require (only-in ffi/unsafe ctype-sizeof _pointer))
-(define racket-bits (* 8 (ctype-sizeof _pointer)))
-(define cmake_flags (if (= racket-bits 32)
-                        "-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32"
-                        "-DCMAKE_BUILD_TYPE=Release"))
-
-; 8. The compilation routine (at least for macosx and unix)
- (if (or (equal? (system-type 'os) 'macosx)
-          (equal? (system-type 'os) 'unix))
-      (if (opencv-installed?)
-          ;;OPEN-CV is found!
-          (begin 
-            (display "-------------- BUILDING OpenCV-C-WRAPPER FOR CAMERA GRABBING --------------")
-            (newline)
-            (current-directory opencv-grab_c-path)
-            (if (system-env (string-append "mkdir build && cd build && cmake " cmake_flags " .. && make && cd .. && rm -rf ./build"))
-                (begin
-                  (copy-file (build-path (current-directory) "bin" dylib-file) dylib-path #t)
-                  #t)
-                (error "Making the opencv-grab_c lib failed, although OpenCV seems to be installed")))
-          (error "OpenCV is not found. Please check if the prefix path is set correctly in /.profile file!"))
-      ;;For windows
-      (if (equal? (system-type 'os) 'windows)
-          (let ((bindir     (build-path opencv-grab_c-path "bin" (string-append "win"(number->string racket-bits)))))
-             (begin
-               (system (string-append "copy " (path->string bindir) "\\*.dll " (path->string local-install-path)))
-               #t))
-          (error "Only Mac OS X, Unix are supported for auto build of opencv-grab_c!")))
+;;Trigger the installation
+(if (member (system-type 'os) '(windows macosx unix))
+    (install-cameracket)
+    (error "Sorry, but cameracket only supports Windows, Mac OS X or Linux"))
